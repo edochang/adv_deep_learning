@@ -1,0 +1,46 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment folders
+env/
+venv/
+.venv/
+ENV/
+.ENV/
+
+# Jupyter runtime, kernels, and metadata
+*.local/share/jupyter/
+*.ipynb_metadata/
+.profile_default/
+.ipython/
+
+# VS Code settings
+.vscode/
+
+# Logs and coverage
+*.log
+*.out
+*.err
+.cache/
+coverage.*
+
+# Environment files and secrets
+.env
+.env.*
+*.env
+
+# macOS metadata
+.DS_Store
+
+# pyenv
+.python-version
+
+# Pip dependency folders
+__pypackages__/
+pip-log.txt
+pip-delete-this-directory.txt
