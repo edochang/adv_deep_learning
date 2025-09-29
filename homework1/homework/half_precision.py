@@ -4,7 +4,7 @@ import torch
 
 from .bignet import BIGNET_DIM, LayerNorm  # noqa: F401
 
-
+# Copilot was used to guide.
 class HalfLinear(torch.nn.Linear):
     def __init__(
         self,
@@ -17,35 +17,66 @@ class HalfLinear(torch.nn.Linear):
         Feel free to use the torch.nn.Linear class as a parent class (it makes load_state_dict easier, names match).
         Feel free to set self.requires_grad_ to False, we will not backpropagate through this layer.
         """
-        # TODO: Implement me
-        raise NotImplementedError()
+        # Call parent constructor with provided parameters 
+        super().__init__(in_features, out_features, bias)
+        self.requires_grad_(False)
+
+        # Initialize weights and bias to half precision for storage
+        self.weight.data = self.weight.data.to(torch.float16)
+        if self.bias is not None:
+            self.bias.data = self.bias.data.to(torch.float16)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # Hint: Use the .to method to cast a tensor to a different dtype (i.e. torch.float16 or x.dtype)
         # The input and output should be of x.dtype = torch.float32
-        # TODO: Implement me
-        raise NotImplementedError()
+        # Note: will not use torch.autocast here to be more explicit on the conversions
+        # Half precision conversion
+        x_half = x.to(torch.float16)  # inputs
+        weight_half = self.weight.to(torch.float16)  # weights
+        bias_half = self.bias.to(torch.float16) if self.bias is not None else None  # bias
 
+        # Perform linear operation in half precision
+        out_half = torch.nn.functional.linear(x_half, weight_half, bias_half)  
+        
+        # Full precision conversion
+        out = out_half.to(x.dtype)  # convert back to original dtype 
+        return out
 
 class HalfBigNet(torch.nn.Module):
     """
-    A BigNet where all weights are in half precision. Make sure that the normalization uses full
-    precision though to avoid numerical instability.
+    A BigNet where all weights are in half precision. Make sure that the normalization uses full precision though to avoid numerical instability.
     """
 
     class Block(torch.nn.Module):
         def __init__(self, channels: int):
             super().__init__()
-            # TODO: Implement me (feel free to copy and reuse code from bignet.py)
-            raise NotImplementedError()
+            self.model = torch.nn.Sequential(
+                HalfLinear(channels, channels),
+                torch.nn.ReLU(),
+                HalfLinear(channels, channels),
+                torch.nn.ReLU(),
+                HalfLinear(channels, channels),
+            )
+
 
         def forward(self, x: torch.Tensor):
             return self.model(x) + x
 
     def __init__(self):
         super().__init__()
-        # TODO: Implement me (feel free to copy and reuse code from bignet.py)
-        raise NotImplementedError()
+        self.model = torch.nn.Sequential(
+            self.Block(BIGNET_DIM),
+            LayerNorm(BIGNET_DIM),
+            self.Block(BIGNET_DIM),
+            LayerNorm(BIGNET_DIM),
+            self.Block(BIGNET_DIM),
+            LayerNorm(BIGNET_DIM),
+            self.Block(BIGNET_DIM),
+            LayerNorm(BIGNET_DIM),
+            self.Block(BIGNET_DIM),
+            LayerNorm(BIGNET_DIM),
+            self.Block(BIGNET_DIM),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
