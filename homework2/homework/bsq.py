@@ -4,7 +4,7 @@ import torch
 
 from .ae import PatchAutoEncoder
 
-
+# Copilot was used to assist and learn the concepts for this implementation.
 def load() -> torch.nn.Module:
     from pathlib import Path
 
@@ -46,7 +46,13 @@ class Tokenizer(abc.ABC):
 class BSQ(torch.nn.Module):
     def __init__(self, codebook_bits: int, embedding_dim: int):
         super().__init__()
-        raise NotImplementedError()
+
+        # Store codebook_bits for later use
+        self._codebook_bits = codebook_bits
+
+        # Define the linear layers for down-projection and up-projection with residual connections
+        self.linear_down = torch.nn.Linear(embedding_dim, codebook_bits)
+        self.linear_up = torch.nn.Linear(codebook_bits, embedding_dim)
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -55,14 +61,21 @@ class BSQ(torch.nn.Module):
         - L2 normalization
         - differentiable sign
         """
-        raise NotImplementedError()
+        encoded_output = self.linear_down(x)
+        # Normalize to unit length to get better quantization
+        # use default p=2 for L2 norm
+        # dim=-1 to normalize the last dimension
+        # use default eps=1e-12 to avoid division by zero
+        encoded_output_norm = torch.nn.functional.normalize(input=encoded_output, p=2, dim=-1)
+        return diff_sign(encoded_output_norm)
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
         """
         Implement the BSQ decoder:
         - A linear up-projection into embedding_dim should suffice
         """
-        raise NotImplementedError()
+        decoded_output = self.linear_up(x)
+        return decoded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.decode(self.encode(x))
@@ -97,19 +110,38 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
 
     def __init__(self, patch_size: int = 5, latent_dim: int = 128, codebook_bits: int = 10):
         super().__init__(patch_size=patch_size, latent_dim=latent_dim)
-        raise NotImplementedError()
+        
+        # Print out the parameters for easy debugging.
+        print(f"BSQPatchAutoEncoder(patch_size={patch_size}, latent_dim={latent_dim}, codebook_bits={codebook_bits})")
+        
+        # Add a BSQ layer after the encoder and before the decoder
+        self.bsq = BSQ(codebook_bits=codebook_bits, embedding_dim=latent_dim)
 
     def encode_index(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        """
+        Run Auto Encoder and BQS, then encode the input tensor x into a set of integer tokens
+        """
+        code = self.encode(x)
+        return self.bsq._code_to_index(code)
 
     def decode_index(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        """
+        Decode a set of integer tokens into an image.
+        """
+        code = self.bsq._index_to_code(x)
+        return self.decode(code)
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        # run the auto-encoder's encode method
+        auto_encoded_output = super().encode(x)
+        #print("Shape of auto_encoded_output:", auto_encoded_output.shape)
+        bsq_encoded_output = self.bsq.encode(auto_encoded_output)
+        return bsq_encoded_output
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        bsq_decoded_output = self.bsq.decode(x)
+        auto_decoded_output = self.decoder(bsq_decoded_output)
+        return auto_decoded_output
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """
@@ -127,4 +159,11 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
                 ...
               }
         """
-        raise NotImplementedError()
+        encoded_index = self.encode_index(x)
+        num_codes = 2 ** self.bsq._codebook_bits
+        cnt = torch.bincount(encoded_index.flatten(), minlength=num_codes)
+        metrics_dictionary = {
+            "cb0": (cnt == 0).float().mean().detach(),
+            "cb2": (cnt <= 2).float().mean().detach()
+        }
+        return self.decode_index(encoded_index), metrics_dictionary
