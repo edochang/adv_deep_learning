@@ -11,7 +11,7 @@ def load() -> torch.nn.Module:
     print(f"Loading {model_name} from {model_path}")
     return torch.load(model_path, weights_only=False)
 
-
+# Copilot was used to assist and learn the concepts for this implementation.
 class Autoregressive(abc.ABC):
     """
     Base class for all autoregressive models.
@@ -95,10 +95,10 @@ class AutoregressiveModel(torch.nn.Module, Autoregressive):
         # flatten the input token image with view and reshape to (B, seq_len)
         # Use view instead of reshape to avoid potential issues with non-contiguous tensors
         # Convert to long type for embedding layer because the indices must be of type LongTensor
-        x_long = x.view(B, seq_len).long # shape (B, seq_len)
+        x_long = x.view(B, seq_len).long() # shape (B, seq_len)
 
         # Embed the input tokens using the token embedding layer
-        x_embedding = self.token_embedding(x_long)
+        x_embedding = self.token_embedding(x_long) # shape (B, seq_len, d_latent)
 
         # Prepare the initial embedding to prepend to the sequence
         # Expand the initial embedding to match the batch size to concatenate with x_embedding
