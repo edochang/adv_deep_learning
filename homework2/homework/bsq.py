@@ -99,7 +99,9 @@ class BSQ(torch.nn.Module):
     def _index_to_code(self, x: torch.Tensor) -> torch.Tensor:
         return 2 * ((x[..., None] & (2 ** torch.arange(self._codebook_bits).to(x.device))) > 0).float() - 1
 
-
+# Notes: 
+# - There is a continuous path from the input image to the reconstructed image that is used for backpropagation / training.  Quantization is handled with a differentiable sign function to allow gradients to flow through the quantization step for training.  This is what encode and decode do.
+# - The encode_index and decode_index functions are used to apply the discrete quantization for tokenization and detokenization.  These functions are not used during training, but are used when the model is deployed for compression and decompression.
 class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
     """
     Combine your PatchAutoEncoder with BSQ to form a Tokenizer.
@@ -121,27 +123,31 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
         """
         Run Auto Encoder and BQS, then encode the input tensor x into a set of integer tokens
         """
-        code = self.encode(x)
-        return self.bsq._code_to_index(code)
+        # image -> AE encode -> BSQ encode -> index
+        code = super().encode(x)
+        return self.bsq.encode_index(code)
 
     def decode_index(self, x: torch.Tensor) -> torch.Tensor:
         """
         Decode a set of integer tokens into an image.
         """
-        code = self.bsq._index_to_code(x)
-        return self.decode(code)
+        # indices -> BSQ decode -> AE decode -> image
+        code = self.bsq.decode_index(x) # decode tokens to codes
+        return super().decode(code) # decode codes to image
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
-        # run the auto-encoder's encode method
+        # image -> AE encode -> BSQ encode (-1/1)
+        # run the auto-encoder's encode method to get latent representations
         auto_encoded_output = super().encode(x)
         #print("Shape of auto_encoded_output:", auto_encoded_output.shape)
-        bsq_encoded_output = self.bsq.encode(auto_encoded_output)
-        return bsq_encoded_output
+        # run the BSQ's encode method to quantize the latent representations
+        return self.bsq.encode(auto_encoded_output)
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
+        # BSQ decode (-1/1) -> AE decode -> image
+        # run the BSQ's decode method to get latent representations
         bsq_decoded_output = self.bsq.decode(x)
-        auto_decoded_output = self.decoder(bsq_decoded_output)
-        return auto_decoded_output
+        return super().decode(bsq_decoded_output)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """
@@ -159,11 +165,11 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
                 ...
               }
         """
-        encoded_index = self.encode_index(x)
+        encoded = self.encode(x)
         num_codes = 2 ** self.bsq._codebook_bits
-        cnt = torch.bincount(encoded_index.flatten(), minlength=num_codes)
+        cnt = torch.bincount(self.encode_index(x).flatten(), minlength=num_codes)
         metrics_dictionary = {
             "cb0": (cnt == 0).float().mean().detach(),
             "cb2": (cnt <= 2).float().mean().detach()
         }
-        return self.decode_index(encoded_index), metrics_dictionary
+        return self.decode(encoded), metrics_dictionary
