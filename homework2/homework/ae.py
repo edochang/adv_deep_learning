@@ -125,45 +125,21 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
 
             # optional layer for decoder bottleneck architecture
             padding = (kernel_size - 1) // 2
-            hidden_dim = latent_dim * 2
+            hidden_dim = latent_dim
 
             # added dropout improved the difference between train and val loss.
-            # recommended that GroupNorm should not be used with bias in convolution layers.
+            # recommended that GroupNorm should not be used with bias in convolution layers and vice-versa if bias=True then GroupNorm should not be used.
             self.conv_layer = torch.nn.Sequential(
                 # first convolution layer to process patches to learn interactions; learn richer features with hidden_dim
                 torch.nn.Conv2d(in_channels=latent_dim, out_channels=hidden_dim, kernel_size=kernel_size, padding=padding),
-                torch.nn.GroupNorm(1, hidden_dim),
                 torch.nn.GELU(),
-                torch.nn.Dropout2d(0.1),
-                # refine learned features from first layer hidden_dim output
-                torch.nn.Conv2d(in_channels=hidden_dim, out_channels=hidden_dim, kernel_size=kernel_size, padding=padding),
-                torch.nn.GroupNorm(1, hidden_dim),
-                torch.nn.GELU(),
-                torch.nn.Dropout2d(0.1),
                 # project to bottleneck with 1x1 convolution to reduce spatial interactions
                 torch.nn.Conv2d(in_channels=hidden_dim, out_channels=bottleneck, kernel_size=1, padding=0),
-                torch.nn.GroupNorm(1, bottleneck)
             )
 
             self.skip = torch.nn.Sequential(
                 torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=1, padding=0),
-                torch.nn.GroupNorm(1, bottleneck)
             )
-
-            self.gelu = torch.nn.GELU()
-
-            """
-            self.conv_layer = torch.nn.Sequential(
-                # first convolution layer to process patches to learn interactions
-                torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=kernel_size, padding=padding, bias=False),
-                torch.nn.GroupNorm(1, latent_dim),
-                torch.nn.GELU(),
-                # project to bottleneck with 1x1 convolution to reduce spatial interactions
-                torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=1, padding=0, bias=False),
-                torch.nn.GroupNorm(1, bottleneck),
-                torch.nn.GELU(),
-            )
-            """
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
             x = self.patchify(x) # Patch x, Shape (B, h, w, latent_dim)
@@ -181,46 +157,26 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
 
             # optional layer for decoder bottleneck architecture
             padding = (kernel_size - 1) // 2
-            hidden_dim = latent_dim * 2
+            hidden_dim = latent_dim
 
             # recommended that GroupNorm should not be used with bias in convolution layers.
             self.convtranspose_layer = torch.nn.Sequential(
                 # first transpose convolution layer to process patches to learn interactions; learn richer features with hidden_dim
-                torch.nn.ConvTranspose2d(bottleneck, hidden_dim, kernel_size=1, padding=0),
-                torch.nn.GroupNorm(1, hidden_dim),
-                torch.nn.GELU(),
-                # refine learned features from first layer hidden_dim output
-                torch.nn.ConvTranspose2d(hidden_dim, hidden_dim, kernel_size=kernel_size, padding=padding),
-                torch.nn.GroupNorm(1, hidden_dim),
+                torch.nn.ConvTranspose2d(in_channels=bottleneck, out_channels=hidden_dim, kernel_size=1, padding=0),
                 torch.nn.GELU(),
                 # project to latent_dim with final transpose convolution
-                torch.nn.ConvTranspose2d(hidden_dim, latent_dim, kernel_size=kernel_size, padding=padding),
-                torch.nn.GroupNorm(1, latent_dim),
+                torch.nn.ConvTranspose2d(in_channels=hidden_dim, out_channels=latent_dim, kernel_size=kernel_size, padding=padding),
             )
 
             self.skip = torch.nn.Sequential(
                 torch.nn.ConvTranspose2d(bottleneck, latent_dim, kernel_size=1, padding=0),
-                torch.nn.GroupNorm(1, latent_dim)
             )
-
-            self.gelu = torch.nn.GELU()
-            
-            """
-            self.convtranspose_layer = torch.nn.Sequential(
-                torch.nn.ConvTranspose2d(bottleneck, latent_dim, kernel_size=1, padding=0, bias=False),
-                torch.nn.GroupNorm(1, latent_dim),
-                torch.nn.GELU(),
-                torch.nn.ConvTranspose2d(latent_dim, latent_dim, kernel_size=kernel_size, padding=padding, bias=False),
-                torch.nn.GroupNorm(1, latent_dim),
-                torch.nn.GELU()
-            )
-            """
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
             x = hwc_to_chw(x)
             x_conv = self.convtranspose_layer(x)
             x_skip = self.skip(x)
-            decoded_patches = chw_to_hwc(self.gelu(x_conv + x_skip)) # Shape (B, h, w, latent_dim)
+            decoded_patches = chw_to_hwc(x_conv + x_skip) # Shape (B, h, w, latent_dim)
             reconstructed_image = self.unpatchify(decoded_patches) # Shape (B, H, W, 3)
             return reconstructed_image
 
