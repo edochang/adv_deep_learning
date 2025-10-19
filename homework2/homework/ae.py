@@ -2,7 +2,7 @@ import abc
 
 import torch
 
-
+# Copilot was used to assist and learn the concepts for this implementation.
 def load() -> torch.nn.Module:
     from pathlib import Path
 
@@ -43,7 +43,9 @@ class PatchifyLinear(torch.nn.Module):
 
     def __init__(self, patch_size: int = 25, latent_dim: int = 128):
         super().__init__()
-        self.patch_conv = torch.nn.Conv2d(3, latent_dim, patch_size, patch_size, bias=False)
+        # use a convolution to patchify the image:: in_channels: 3 (RGB) -> out_channels: latent_dim
+        # no bias, as the model can learn a bias in later layers if needed.
+        self.patch_conv = torch.nn.Conv2d(in_channels=3, out_channels=latent_dim, kernel_size=patch_size, stride=patch_size, bias=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -65,6 +67,8 @@ class UnpatchifyLinear(torch.nn.Module):
 
     def __init__(self, patch_size: int = 25, latent_dim: int = 128):
         super().__init__()
+        # use transposed convolution to unpatchify the image:: in_channels = latent_dim -> out_channels = 3 (RGB)
+        # No bias, as the model can learn a bias in later layers if needed.
         self.unpatch_conv = torch.nn.ConvTranspose2d(latent_dim, 3, patch_size, patch_size, bias=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -112,24 +116,81 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
                      It can make later parts of the homework easier (reusable components).
         """
 
-        def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
+        # latent_dim is the dimension of the PatchifyLinear output
+        # bottleneck is the dimension of the encoder output
+        def __init__(self, patch_size: int, latent_dim: int, bottleneck: int, kernel_size: int):
             super().__init__()
-            raise NotImplementedError()
+            # patchify layer
+            self.patchify = PatchifyLinear(patch_size, latent_dim)
+
+            # optional layer for decoder bottleneck architecture
+            padding = (kernel_size - 1) // 2
+            hidden_dim = latent_dim
+
+            # added dropout improved the difference between train and val loss.
+            # recommended that GroupNorm should not be used with bias in convolution layers and vice-versa if bias=True then GroupNorm should not be used.
+            self.conv_layer = torch.nn.Sequential(
+                # first convolution layer to process patches to learn interactions; learn richer features with hidden_dim
+                torch.nn.Conv2d(in_channels=latent_dim, out_channels=hidden_dim, kernel_size=kernel_size, padding=padding),
+                torch.nn.GELU(),
+                # project to bottleneck with 1x1 convolution to reduce spatial interactions
+                torch.nn.Conv2d(in_channels=hidden_dim, out_channels=bottleneck, kernel_size=1, padding=0),
+            )
+
+            self.skip = torch.nn.Sequential(
+                torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=1, padding=0),
+            )
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            raise NotImplementedError()
+            x = self.patchify(x) # Patch x, Shape (B, h, w, latent_dim)
+            x = hwc_to_chw(x) # Shape (B, latent_dim, h, w)
+            x_conv = self.conv_layer(x) # Shape (B, bottleneck, h, w)
+            x_skip = self.skip(x)
+            encoded_output = chw_to_hwc(x_conv + x_skip) # Shape (B, h, w, bottleneck)
+            return encoded_output
 
     class PatchDecoder(torch.nn.Module):
-        def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
+        def __init__(self, patch_size: int, latent_dim: int, bottleneck: int, kernel_size: int):
             super().__init__()
-            raise NotImplementedError()
+            # unpatchify layer
+            self.unpatchify = UnpatchifyLinear(patch_size, latent_dim)
+
+            # optional layer for decoder bottleneck architecture
+            padding = (kernel_size - 1) // 2
+            hidden_dim = latent_dim
+
+            # recommended that GroupNorm should not be used with bias in convolution layers.
+            self.convtranspose_layer = torch.nn.Sequential(
+                # first transpose convolution layer to process patches to learn interactions; learn richer features with hidden_dim
+                torch.nn.ConvTranspose2d(in_channels=bottleneck, out_channels=hidden_dim, kernel_size=1, padding=0),
+                torch.nn.GELU(),
+                # project to latent_dim with final transpose convolution
+                torch.nn.ConvTranspose2d(in_channels=hidden_dim, out_channels=latent_dim, kernel_size=kernel_size, padding=padding),
+            )
+
+            self.skip = torch.nn.Sequential(
+                torch.nn.ConvTranspose2d(bottleneck, latent_dim, kernel_size=1, padding=0),
+            )
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            raise NotImplementedError()
+            x = hwc_to_chw(x)
+            x_conv = self.convtranspose_layer(x)
+            x_skip = self.skip(x)
+            decoded_patches = chw_to_hwc(x_conv + x_skip) # Shape (B, h, w, latent_dim)
+            reconstructed_image = self.unpatchify(decoded_patches) # Shape (B, H, W, 3)
+            return reconstructed_image
 
     def __init__(self, patch_size: int = 25, latent_dim: int = 128, bottleneck: int = 128):
         super().__init__()
-        raise NotImplementedError()
+        # Print out the parameters for easy debugging.
+        print(f"PatchAutoEncoder(patch_size={patch_size}, latent_dim={latent_dim}, bottleneck={bottleneck})")
+
+        # Define hyperparameters for convolution layer for encoder and decoder
+        # With patch_size=25 a kernel_size of 3-5 provided low difference between train and val.  When testing with 11, the model underfitted.  
+        kernel_size = 5
+
+        self.encoder = self.PatchEncoder(patch_size, latent_dim, bottleneck, kernel_size)
+        self.decoder = self.PatchDecoder(patch_size, latent_dim, bottleneck, kernel_size)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """
@@ -137,10 +198,12 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
         minimize (or even just visualize).
         You can return an empty dictionary if you don't have any additional terms.
         """
-        raise NotImplementedError()
+        return self.decode(self.encode(x)), {}
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        #print("Called PatchAutoEncoder.encode()")
+        #print(f"Input shape: {x.shape}")
+        return self.encoder(x)
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        return self.decoder(x)
