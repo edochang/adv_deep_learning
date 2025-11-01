@@ -1,0 +1,300 @@
+Q: How does 4 years measure up in terms of week?
+A: nan
+
+Q: What is the measurement of 3 kg when converted into pound?
+A: 6.443333333333333
+
+Q: How many MB is 2 G?
+A: 2000000000.0
+
+Q: What is the equivalent of 2 kB in bit?
+A: 2048.0
+
+Q: Convert 5 quart to pint?
+A: 2.113376409932588
+
+Q: How do we translate 5 gallon into fluid ounce?
+A: 16.0
+
+Q: Could you give the conversion from fluid ounce to millilitre for 4 units?
+A: 1.056688
+
+Q: Can you provide the conversion value from kg to g for 6 units?
+A: 2.2046226218688765
+
+Q: How do we translate 3 mi/h into m/s?
+A: 1.4714803486666668
+
+Q: How much is 3 ft when converted to yd?
+A: 0.9144
+
+Q: Can you change 6 miles to its equivalent in m?
+A: 3.785411784096237
+
+Q: How do we express 10 h in terms of second?
+A: nan
+
+Q: How do we express 2 kmh in terms of ft/s?
+A: 2.6459874955625
+
+Q: Convert the measurement of 9 kB into bit.
+A: 9000000000.0
+
+Q: Express 2 B as a quantity of bit.
+A: 0.0
+
+Q: Could you provide the value of 8 week in day?
+A: 0.0
+
+Q: How do we express 10 h in terms of second?
+A: nan
+
+Q: What is the equivalent of 7 ft/s in kmh?
+A: 20.0
+
+Q: Please convert 1 m into ft.
+A: 3.280839895013123
+
+Q: How does 5 byte measure up in terms of bit?
+A: 5.0
+
+Q: How much is 5 litre when converted to milliliter?
+A: 500.0
+
+Q: Please convert 3 kg into pound.
+A: 1.5
+
+Q: Could you provide the value of 3 kg in gram?
+A: 9.84423076923077
+
+Q: How many milliliter make up 7 litre?
+A: 0.7
+
+Q: Could you give the conversion from year to day for 7 units?
+A: 0.0
+
+Q: What is the conversion from decades to month for 5 units?
+A: 0.0
+
+Q: Convert the measurement of 4 week into month.
+A: 1.111111111111111
+
+Q: How many gram are there per 3 ounce?
+A: 0.90718474
+
+Q: Can you change 4 month to its equivalent in h?
+A: 165.0
+
+Q: How do we translate 4 MB into KB?
+A: 4000.0
+
+Q: How much is 6 mi/h when converted to m/s?
+A: 3.333333333333333
+
+Q: How do we express 1 kg in terms of ounce?
+A: 0.45359237
+
+Q: How much is 7 km/h when converted to ft/s?
+A: 0.4678888888888889
+
+Q: Convert the measurement of 7 meter into cm.
+A: 700.0
+
+Q: Convert the measurement of 4 m/s into in/s.
+A: 12.8
+
+Q: How does 5 ton measure up in terms of kg?
+A: 1000.0
+
+Q: How does 5 m measure up in terms of cm?
+A: 5.000000000000001
+
+Q: How do we translate 7 KB into bit?
+A: 0.0
+
+Q: How do we express 3 meter in terms of in?
+A: 0.984254
+
+Q: What is the measurement of 2 kg when converted into g?
+A: 4.44822161526816
+
+Q: Convert the measurement of 3 GB into MB.
+A: 1.5
+
+Q: How many ounce is 6 quart?
+A: 2.5
+
+Q: Please convert 5 ft into m.
+A: 1.524
+
+Q: Express 5 pound as a quantity of ounce.
+A: 1.054516129032258
+
+Q: Can you provide the conversion value from kg to pound for 1 units?
+A: 0.45359237
+
+Q: What is the equivalent of 7 kB in byte?
+A: 28800.0
+
+Q: How many kg are there per 7 ton?
+A: 0.0
+
+Q: Could you give the conversion from litre to gallon for 10 units?
+A: 0.2641720512415625
+
+Q: How many litre is 4 quart?
+A: 0.9
+
+Q: Could you give the conversion from quart to gallon for 10 units?
+A: 0.47317682539816325
+
+Q: What is the conversion from century to decades for 3 units?
+A: 30.0
+
+Q: How many km is 2 miles?
+A: 0.25
+
+Q: What is 1 GB in M?
+A: nan
+
+Q: How does 2 kmh measure up in terms of in/s?
+A: 2.6459874955625
+
+Q: How many kg make up 1 pound?
+A: 0.45359237
+
+Q: Can you change 2 gallon to its equivalent in l?
+A: 0.8
+
+Q: Express 2 cm as a quantity of in.
+A: 0.08333333333333333
+
+Q: How do we express 8 bit in terms of B?
+A: 8.0
+
+Q: Could you convert 5 century to its corresponding value in months?
+A: 1.111111111111111
+
+Q: What is the conversion of 3 yd to mm?
+A: 914.4
+
+Q: How much is 3 m when converted to mm?
+A: 0.03
+
+Q: Could you convert 7 fluid ounce to its corresponding value in mL?
+A: 235.2135987499999
+
+Q: How do we translate 1 KB into byte?
+A: 1024.0
+
+Q: How do we express 5 kB in terms of byte?
+A: 5000000.0
+
+Q: What is the measurement of 8 weeks when converted into h?
+A: 168.0
+
+Q: What is the conversion of 7 miles to ft?
+A: 11.299999999999999
+
+Q: How does 6 year measure up in terms of months?
+A: 182.44444444444443
+
+Q: Tell me how many MB are there in 7 G.
+A: nan
+
+Q: Convert the measurement of 4 liter into fluid ounce.
+A: 1.536
+
+Q: What does 6 l equal in millilitre terms?
+A: 0.6
+
+Q: How does 2 M measure up in terms of KB?
+A: 2.0
+
+Q: How much is 3 metric ton when converted to pound?
+A: 1000.0
+
+Q: Can you provide the conversion value from metric ton to kg for 10 units?
+A: 1000000.0
+
+Q: What is the conversion from quart to liter for 8 units?
+A: 0.28428428428428426
+
+Q: What is the measurement of 1 hour when converted into second?
+A: 3600.0
+
+Q: Could you convert 8 mph to its corresponding value in kmh?
+A: 12.598741259874124
+
+Q: What does 1 tonne equal in pound terms?
+A: 2000.0
+
+Q: What is the conversion from h to second for 5 units?
+A: 0.0
+
+Q: Please convert 6 h into seconds.
+A: nan
+
+Q: What is the measurement of 2 mph when converted into m/s?
+A: 2.6459236
+
+Q: Please convert 6 mi/h into ft/s.
+A: 3.333333333333333
+
+Q: What is 4 gallon in fluid ounce?
+A: 1.29073545
+
+Q: Convert 1 km to m?
+A: 1000.0
+
+Q: Express 10 MB as a quantity of kB.
+A: nan
+
+Q: How do we translate 2 yd into meter?
+A: 0.9144
+
+Q: What is 4 kg in g?
+A: 8.844444444444443
+
+Q: Could you provide the value of 5 cm in in?
+A: 0.1933333333333333
+
+Q: Express 10 years as a quantity of months.
+A: nan
+
+Q: Please convert 10 m into in.
+A: 3.280839895013123
+
+Q: How many kB is 1 M?
+A: 1024.0
+
+Q: How many min is 5 hours?
+A: 0.8
+
+Q: Tell me how many kg are there in 6 metric ton.
+A: 6000000.0
+
+Q: Express 3 ton as a quantity of kg.
+A: 0.64
+
+Q: Convert the measurement of 4 gallon into cm**3.
+A: 168.0
+
+Q: Could you convert 4 pound to its corresponding value in g?
+A: 1.8288
+
+Q: How many ounce make up 8 pint?
+A: 2.0
+
+Q: What is the conversion from month to h for 3 units?
+A: 1.524
+
+Q: What is the conversion from miles to ft for 1 units?
+A: 1.4717957149664063
+
+Q: Can you change 1 h to its equivalent in second?
+A: nan
+
+Q: Please convert 8 h into second.
+A: 0.0
+
