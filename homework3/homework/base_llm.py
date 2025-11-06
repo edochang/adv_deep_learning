@@ -9,11 +9,14 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is
 
 # Copilot was used as a teaching assistance and guide
 class BaseLLM:
-    def __init__(self, checkpoint=checkpoint):
+    def __init__(self, checkpoint=checkpoint, use_bfloat16: bool = False):
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-        self.model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
+        if (use_bfloat16 and device == "cuda" and torch.cuda.is_bf16_supported()):
+            self.model = AutoModelForCausalLM.from_pretrained(checkpoint, torch_dtype=torch.bfloat16).to(device)
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
         self.device = device
-        print(f"BaseLLM __initi__: Loaded model on device: {self.device}")
+        print(f"BaseLLM __initi__: Loaded model on device: {self.device} using model ({checkpoint}) with {'bfloat16' if use_bfloat16 else 'float32'}")
 
     def format_prompt(self, question: str) -> str:
         """
@@ -32,7 +35,7 @@ class BaseLLM:
         try:
             return float(answer.split("<answer>")[1].split("</answer>")[0])
         except (IndexError, ValueError):
-            print(f"BaseLLM parse_answer: BAD answer:\n{answer}")  # debug
+            #print(f"BaseLLM parse_answer: BAD answer:\n{answer}")  # debug
             return float("nan")
 
     def generate(self, prompt: str) -> str:
@@ -107,7 +110,7 @@ class BaseLLM:
         0.4 - 0.6: Moderate temperature, balances randomness and focus.
         0.7 - 1.0: High temperature, more diverse and creative outputs. May reduce factual accuracy.
         """
-        temperature = 0.2 # override temperature for more diverse outputs
+        #temperature = 0.2 # override temperature for more diverse outputs
         repetition_penalty = 1.1 # override repetition penalty to reduce repetitive outputs
         # Set a reasonable limit for the number of tokens to generate. Prevents infinite generation.
         max_new_tokens = 150
@@ -132,6 +135,7 @@ class BaseLLM:
         inputs = self.tokenizer(prompts, padding=True, return_tensors="pt").to(self.device)
 
         # n_return_sequences handling per overloads
+        #print(f"num_return_sequences: {num_return_sequences}, datatype: {type(num_return_sequences)}")  # debug
         n_return_sequences = num_return_sequences if num_return_sequences is not None else 1
 
         # generate outputs
@@ -154,8 +158,24 @@ class BaseLLM:
         # : keeps all rows, input_length: keeps columns from input_length to end
         generated_outputs = outputs[:, input_length:] # Slice outputs to remove input tokens
         
+        # use batch_decode for flexibility when num_return_sequences is 1 or more than 1
+        decoded_outputs = self.tokenizer.batch_decode(generated_outputs, skip_special_tokens=True)
+
+        # handle return type based on num_return_sequences
+        if n_return_sequences == 1:
+            # return list of strings: list[str]
+            return decoded_outputs
+        else:
+            # return list of list of strings: list[list[str]]
+            grouped_outputs = [
+                decoded_outputs[i : i + num_return_sequences] for i in range(0, len(decoded_outputs), num_return_sequences)
+            ]
+            return grouped_outputs
+
+        """
         # use list comprehension to decode each output in outputs
         return [self.tokenizer.decode(generated_output, skip_special_tokens=True) for generated_output in generated_outputs]
+        """
 
     def answer(self, *questions) -> list[float]:
         """

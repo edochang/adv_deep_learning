@@ -20,10 +20,10 @@ class CoTModel(BaseLLM):
         # Use LLM to determine common conversion patterns in train.json: These are:
         
         # - mass conversion ✔️
-        # - speed conversion ✔️
-        # - data storage conversion ✔️
+        # - speed conversion 
+        # - data storage conversion 
         # - time conversion ✔️
-        # - length conversion ✔️
+        # - length conversion 
         # - volume conversion ✔️
         messages: list[dict[str, str]] = [
             {"role": "system", "content": system_prompt},
