@@ -142,16 +142,19 @@ class BaseLLM:
         # Enable sampling for more diverse / creative outputs
         do_sample = True if temperature > 0 else False  # Set do_sample based on temperature
         # note: use ** to unpack the inputs dictionary to pass as keyword arguments to the generate function's parameters. input_ids is passed to inputs and attention_mask is passed to attention_mask.
-        #with torch.no_grad():
-        outputs = self.model.generate(
-            **inputs, 
-            max_new_tokens=max_new_tokens, 
-            do_sample=do_sample, 
-            temperature=temperature if do_sample else 1.0, # default temperature is 1.0 when do_sample is False
-            num_return_sequences=n_return_sequences, 
-            repetition_penalty=repetition_penalty if do_sample else None, # apply repetition penalty only when sampling
-            eos_token_id=self.tokenizer.eos_token_id
-        )
+        # note: use torch.no_grad() to disable gradient calculation for inference when generating text to improve performance and reduce memory usage.
+        with torch.no_grad():
+            outputs = self.model.generate(
+                #**inputs, 
+                input_ids=inputs["input_ids"],
+                attention_mask=inputs["attention_mask"],
+                max_new_tokens=max_new_tokens, 
+                do_sample=do_sample, 
+                temperature=temperature if do_sample else 1.0, # default temperature is 1.0 when do_sample is False
+                num_return_sequences=n_return_sequences, 
+                repetition_penalty=repetition_penalty if do_sample else None, # apply repetition penalty only when sampling
+                eos_token_id=self.tokenizer.eos_token_id
+            )
 
         # Slice outputs to remove input tokens per Pro Tip
         input_length = len(inputs["input_ids"][0]) # Get the length of the input
@@ -170,6 +173,7 @@ class BaseLLM:
             grouped_outputs = [
                 decoded_outputs[i : i + num_return_sequences] for i in range(0, len(decoded_outputs), num_return_sequences)
             ]
+            print(f"batched_generate: Generated {len(grouped_outputs)} groups of {num_return_sequences} outputs each.")  # debug
             return grouped_outputs
 
         """
