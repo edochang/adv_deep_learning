@@ -1,7 +1,7 @@
 from .base_llm import BaseLLM
 from .data import Dataset, benchmark
 
-
+# Copilot was used as a teaching assistance and guide
 def load() -> BaseLLM:
     from pathlib import Path
 
@@ -49,7 +49,10 @@ def format_example(prompt: str, answer: str) -> dict[str, str]:
     """
     Construct a question / answer pair. Consider rounding the answer to make it easier for the LLM.
     """
-    raise NotImplementedError()
+    round_answer = round(float(answer), 3)
+    tag_answer = f"<answer>{round_answer}</answer>"
+    question_answer = {"question": prompt, "answer": tag_answer}
+    return question_answer
 
 
 class TokenizedDataset:
@@ -78,7 +81,67 @@ def train_model(
     output_dir: str,
     **kwargs,
 ):
-    raise NotImplementedError()
+    from peft import LoraConfig, get_peft_model
+    from transformers import TrainingArguments, Trainer
+    
+    # initialize dataset and model
+    llm = BaseLLM()
+    trainset = Dataset("train")
+
+    # tokenize the dataset to prepare for training with LoRA adapters
+    tokenized_trainset = TokenizedDataset(llm.tokenizer, trainset, format_example)
+
+    # some r value that keeps the model size below 20MB
+    rank = 8
+    # about 4-5 times the rank
+    lora_alpha = rank * 4
+
+    peft_config = LoraConfig(
+        r=rank,
+        lora_alpha=lora_alpha,
+        target_modules="all-linear",
+        #lora_dropout=0.1,
+        bias="none",
+        task_type="CAUSAL_LM",
+    )
+
+    # convert BaseLLM model to a PEFT model with LoRA adapters
+    llm.model = get_peft_model(llm.model, peft_config)
+    
+    if llm.device == "cuda":
+        # to avoid a bug with gradient_checkpointing and LoRA on CUDA
+        llm.model.enable_input_require_grads()
+
+    # setup training arguments
+    training_args = TrainingArguments(
+        gradient_checkpointing=True, # save GPU memory
+        learning_rate=1e-3,
+        output_dir=output_dir,
+        logging_dir=output_dir,
+        report_to="tensorboard",
+        num_train_epochs=5,
+        per_device_train_batch_size=32,
+        #gradient_accumulation_steps=4,
+        #warmup_steps=100,
+        #fp16=True,
+        #logging_steps=10,
+        #save_total_limit=1,
+        #save_steps=200,
+    )
+
+    # setup Trainer
+    trainer = Trainer(
+        model=llm.model, # PEFT model with LoRA adapters
+        args=training_args, # TrainingArguments
+        train_dataset=tokenized_trainset, # TokenizedDataset
+    )
+
+    trainer.train()
+    # save PEFT model with LoRA adapters
+    trainer.save_model(output_dir)
+    #llm.model.save_pretrained(output_dir) # Alternative way to save the LoRA adapters
+    # save tokenizer as well
+    llm.tokenizer.save_pretrained(output_dir)
     test_model(output_dir)
 
 

@@ -44,6 +44,17 @@ class BenchmarkResult:
             )
             for item, answer in zip(dataset, answers[:max_question])
         ]
+
+        """
+        # export samples to a debug file
+        with open("benchmark_samples_debug_output.txt", "w") as f:
+            for sample in samples:
+                f.write(f"Question: {sample.question}\n")
+                f.write(f"Answer: {sample.answer}\n")
+                f.write(f"Correct Answer: {sample.correct_answer}\n")
+                f.write(f"Is Correct: {sample.is_correct}\n\n")
+        """
+
         n = min(len(dataset), max_question)
         return cls(
             accuracy=sum(sample.is_correct for sample in samples) / n,
@@ -56,6 +67,22 @@ def benchmark(func: BaseLLM, dataset: Dataset, max_question: int) -> BenchmarkRe
     idx = range(min(len(dataset), max_question))
     questions = [dataset[i][0] for i in idx]
     answers = func.answer(*questions)
+
+    """
+    # exports questions and answers to a debug file and overwrites existing file
+    with open("benchmark_debug_output.txt", "w") as f:
+        for i in range(len(answers)):
+            f.write(f"Q: {questions[i]}\nA: {answers[i]}\n\n")
+    """
+
+    """
+    # print questions and answers
+    print(f"benchmark: Collected {len(answers)} answers")  # debug
+    print("benchmark: Sample answers:")
+    for i in range(min(5, len(answers))):
+        print(f"Q: {questions[i]} A: {answers[i]}")  # debug
+    """
+    
     return BenchmarkResult.from_answers(answers, dataset, max_question)
 
 

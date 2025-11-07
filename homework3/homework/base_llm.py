@@ -7,12 +7,16 @@ checkpoint = "HuggingFaceTB/SmolLM2-360M-Instruct"
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
-
+# Copilot was used as a teaching assistance and guide
 class BaseLLM:
-    def __init__(self, checkpoint=checkpoint):
+    def __init__(self, checkpoint=checkpoint, use_bfloat16: bool = False):
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-        self.model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
+        if (use_bfloat16 and device == "cuda" and torch.cuda.is_bf16_supported()):
+            self.model = AutoModelForCausalLM.from_pretrained(checkpoint, torch_dtype=torch.bfloat16).to(device)
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
         self.device = device
+        print(f"BaseLLM __initi__: Loaded model on device: {self.device} using model ({checkpoint}) with {'bfloat16' if use_bfloat16 else 'float32'}")
 
     def format_prompt(self, question: str) -> str:
         """
@@ -27,9 +31,11 @@ class BaseLLM:
         Parse the <answer></answer> tag and return a float.
         This function is somewhat robust to output errors (e.g. missing </answer> tags).
         """
+        #print(f"BaseLLM parse_answer: Parsing answer:\n{answer}")  # debug
         try:
             return float(answer.split("<answer>")[1].split("</answer>")[0])
         except (IndexError, ValueError):
+            #print(f"BaseLLM parse_answer: BAD answer:\n{answer}")  # debug
             return float("nan")
 
     def generate(self, prompt: str) -> str:
@@ -43,8 +49,9 @@ class BaseLLM:
         - decode the outputs with self.tokenizer.decode
 
         """
-        return self.batched_generate([prompt])[0]
+        return self.batched_generate([prompt])[0]    
 
+    # type checker stubs for overloads. This is a function dectorator, so no implementation needed.
     @overload
     def batched_generate(
         self, prompts: list[str], num_return_sequences: None = None, temperature: float = 0
@@ -54,6 +61,7 @@ class BaseLLM:
         This version returns a single generation for each prompt.
         """
 
+    # type checker stubs for overloads. This is a function dectorator, so no implementation needed.
     @overload
     def batched_generate(
         self, prompts: list[str], num_return_sequences: int, temperature: float = 0
@@ -83,6 +91,7 @@ class BaseLLM:
                               (50 should suffice).
             - do_sample and temperature: For any temperature > 0, set do_sample=True.
                                          do_sample=False will use greedy decoding.
+                                         temperature for more or less randomness in generation.
             - num_return_sequences: The number of sequences to return. Note that this will generate a flat
                                     list of len(prompts) * num_return_sequences entries.
             - eos_token_id: The end of sequence token id. This is used to stop generation. Set this
@@ -90,6 +99,22 @@ class BaseLLM:
         Pro Tip: Only batch_decode generated tokens by masking out the inputs with
                  outputs[:, len(inputs["input_ids"][0]) :]
         """
+        # hyperparameter for model generation
+        """ Temperature notes:
+        - A temperature of 0 makes the model deterministic, always picking the most likely next token.
+        - Lower temperatures (e.g., 0.2) make the model more focused and deterministic, often resulting in more repetitive or conservative outputs.
+        - Higher temperatures (e.g., 0.7, 1.0) introduce randomness, allowing the model to sample from a wider range of possible next tokens.
+
+        0 with do_sample=False: Deterministic output, always the same for the same input.
+        0.1 - 0.3: Low temperature, more focused and deterministic outputs.
+        0.4 - 0.6: Moderate temperature, balances randomness and focus.
+        0.7 - 1.0: High temperature, more diverse and creative outputs. May reduce factual accuracy.
+        """
+        #temperature = 0.2 # override temperature for more diverse outputs
+        repetition_penalty = 1.1 # override repetition penalty to reduce repetitive outputs
+        # Set a reasonable limit for the number of tokens to generate. Prevents infinite generation.
+        max_new_tokens = 150
+
         from tqdm import tqdm  # Importing tqdm for progress bar
 
         # Preventing OOM
@@ -104,8 +129,57 @@ class BaseLLM:
                 )
                 for r in self.batched_generate(prompts[idx : idx + micro_batch_size], num_return_sequences, temperature)
             ]
+        
+        # tokenize the prompts with padding
+        self.tokenizer.padding_side = "left"
+        inputs = self.tokenizer(prompts, padding=True, return_tensors="pt").to(self.device)
 
-        raise NotImplementedError()
+        # n_return_sequences handling per overloads
+        #print(f"num_return_sequences: {num_return_sequences}, datatype: {type(num_return_sequences)}")  # debug
+        n_return_sequences = num_return_sequences if num_return_sequences is not None else 1
+
+        # generate outputs
+        # Enable sampling for more diverse / creative outputs
+        do_sample = True if temperature > 0 else False  # Set do_sample based on temperature
+        # note: use ** to unpack the inputs dictionary to pass as keyword arguments to the generate function's parameters. input_ids is passed to inputs and attention_mask is passed to attention_mask.
+        # note: use torch.no_grad() to disable gradient calculation for inference when generating text to improve performance and reduce memory usage.
+        with torch.no_grad():
+            outputs = self.model.generate(
+                #**inputs, 
+                input_ids=inputs["input_ids"],
+                attention_mask=inputs["attention_mask"],
+                max_new_tokens=max_new_tokens, 
+                do_sample=do_sample, 
+                temperature=temperature if do_sample else 1.0, # default temperature is 1.0 when do_sample is False
+                num_return_sequences=n_return_sequences, 
+                repetition_penalty=repetition_penalty if do_sample else None, # apply repetition penalty only when sampling
+                eos_token_id=self.tokenizer.eos_token_id
+            )
+
+        # Slice outputs to remove input tokens per Pro Tip
+        input_length = len(inputs["input_ids"][0]) # Get the length of the input
+        # : keeps all rows, input_length: keeps columns from input_length to end
+        generated_outputs = outputs[:, input_length:] # Slice outputs to remove input tokens
+        
+        # use batch_decode for flexibility when num_return_sequences is 1 or more than 1
+        decoded_outputs = self.tokenizer.batch_decode(generated_outputs, skip_special_tokens=True)
+
+        # handle return type based on num_return_sequences
+        if n_return_sequences == 1:
+            # return list of strings: list[str]
+            return decoded_outputs
+        else:
+            # return list of list of strings: list[list[str]]
+            grouped_outputs = [
+                decoded_outputs[i : i + num_return_sequences] for i in range(0, len(decoded_outputs), num_return_sequences)
+            ]
+            print(f"batched_generate: Generated {len(grouped_outputs)} groups of {num_return_sequences} outputs each.")  # debug
+            return grouped_outputs
+
+        """
+        # use list comprehension to decode each output in outputs
+        return [self.tokenizer.decode(generated_output, skip_special_tokens=True) for generated_output in generated_outputs]
+        """
 
     def answer(self, *questions) -> list[float]:
         """
@@ -114,6 +188,14 @@ class BaseLLM:
         # Convert each question
         prompts = [self.format_prompt(q) for q in questions]
         generations = self.batched_generate(prompts)
+        
+        """
+        # exports prompts and generations to a debug file and overwrites existing file
+        with open("answer_debug_output.txt", "w") as f:
+            for i in range(len(generations)):
+                f.write(f"Prompt: {prompts[i]}\nGeneration: {generations[i]}\n\n")
+        """
+
         return [self.parse_answer(g) for g in generations]
 
 

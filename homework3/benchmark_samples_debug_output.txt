@@ -1,0 +1,500 @@
+Question: How does 4 years measure up in terms of week?
+Answer: 204.571428
+Correct Answer: 208.709827875
+Is Correct: True
+
+Question: What is the measurement of 3 kg when converted into pound?
+Answer: 6.61386
+Correct Answer: 6.613867865546327
+Is Correct: True
+
+Question: How many MB is 2 G?
+Answer: 2000.0
+Correct Answer: 2000.0
+Is Correct: True
+
+Question: What is the equivalent of 2 kB in bit?
+Answer: 2000.0
+Correct Answer: 16000.0
+Is Correct: False
+
+Question: Convert 5 quart to pint?
+Answer: 10.0
+Correct Answer: 10.0
+Is Correct: True
+
+Question: How do we translate 5 gallon into fluid ounce?
+Answer: 80.0
+Correct Answer: 640.0
+Is Correct: False
+
+Question: Could you give the conversion from fluid ounce to millilitre for 4 units?
+Answer: 4000.0
+Correct Answer: 118.29411825000005
+Is Correct: False
+
+Question: Can you provide the conversion value from kg to g for 6 units?
+Answer: 6000.0
+Correct Answer: 6000.0
+Is Correct: True
+
+Question: How do we translate 3 mi/h into m/s?
+Answer: 1.34212
+Correct Answer: 1.34112
+Is Correct: True
+
+Question: How much is 3 ft when converted to yd?
+Answer: 2.7424
+Correct Answer: 1.0
+Is Correct: False
+
+Question: Can you change 6 miles to its equivalent in m?
+Answer: 6.0
+Correct Answer: 9656.064
+Is Correct: False
+
+Question: How do we express 10 h in terms of second?
+Answer: 10.0
+Correct Answer: 36000.0
+Is Correct: False
+
+Question: How do we express 2 kmh in terms of ft/s?
+Answer: 7.2
+Correct Answer: 1.8226888305628464
+Is Correct: False
+
+Question: Convert the measurement of 9 kB into bit.
+Answer: 9000.0
+Correct Answer: 72000.0
+Is Correct: False
+
+Question: Express 2 B as a quantity of bit.
+Answer: 16.0
+Correct Answer: 16.0
+Is Correct: True
+
+Question: Could you provide the value of 8 week in day?
+Answer: 1440.0
+Correct Answer: 56.0
+Is Correct: False
+
+Question: How do we express 10 h in terms of second?
+Answer: 36000.0
+Correct Answer: 36000.0
+Is Correct: True
+
+Question: What is the equivalent of 7 ft/s in kmh?
+Answer: 7000.0
+Correct Answer: 7.680960000000001
+Is Correct: False
+
+Question: Please convert 1 m into ft.
+Answer: nan
+Correct Answer: 3.280839895013123
+Is Correct: False
+
+Question: How does 5 byte measure up in terms of bit?
+Answer: 5000.0
+Correct Answer: 40.0
+Is Correct: False
+
+Question: How much is 5 litre when converted to milliliter?
+Answer: 5000.0
+Correct Answer: 5000.000000000001
+Is Correct: True
+
+Question: Please convert 3 kg into pound.
+Answer: 6.61386
+Correct Answer: 6.613867865546327
+Is Correct: True
+
+Question: Could you provide the value of 3 kg in gram?
+Answer: 3000.0
+Correct Answer: 3000.0
+Is Correct: True
+
+Question: How many milliliter make up 7 litre?
+Answer: 7000.0
+Correct Answer: 7000.000000000001
+Is Correct: True
+
+Question: Could you give the conversion from year to day for 7 units?
+Answer: 2525.0
+Correct Answer: 2556.69539146875
+Is Correct: True
+
+Question: What is the conversion from decades to month for 5 units?
+Answer: 60.0
+Correct Answer: 600.0
+Is Correct: False
+
+Question: Convert the measurement of 4 week into month.
+Answer: 16.0
+Correct Answer: 0.9199375130288172
+Is Correct: False
+
+Question: How many gram are there per 3 ounce?
+Answer: 3000.0
+Correct Answer: 85.048569375
+Is Correct: False
+
+Question: Can you change 4 month to its equivalent in h?
+Answer: 48.0
+Correct Answer: 2921.9375902499996
+Is Correct: False
+
+Question: How do we translate 4 MB into KB?
+Answer: 4000.0
+Correct Answer: 4000.0
+Is Correct: True
+
+Question: How much is 6 mi/h when converted to m/s?
+Answer: 600.0
+Correct Answer: 2.68224
+Is Correct: False
+
+Question: How do we express 1 kg in terms of ounce?
+Answer: 0.453592
+Correct Answer: 35.27396194958041
+Is Correct: False
+
+Question: How much is 7 km/h when converted to ft/s?
+Answer: 6818.18
+Correct Answer: 6.379410906969962
+Is Correct: False
+
+Question: Convert the measurement of 7 meter into cm.
+Answer: 700.0
+Correct Answer: 700.0
+Is Correct: True
+
+Question: Convert the measurement of 4 m/s into in/s.
+Answer: 0.04
+Correct Answer: 157.4803149606299
+Is Correct: False
+
+Question: How does 5 ton measure up in terms of kg?
+Answer: 5000.0
+Correct Answer: 5000.0
+Is Correct: True
+
+Question: How does 5 m measure up in terms of cm?
+Answer: 500.0
+Correct Answer: 500.0
+Is Correct: True
+
+Question: How do we translate 7 KB into bit?
+Answer: 7000.0
+Correct Answer: 56000.0
+Is Correct: False
+
+Question: How do we express 3 meter in terms of in?
+Answer: 300.0
+Correct Answer: 118.11023622047242
+Is Correct: False
+
+Question: What is the measurement of 2 kg when converted into g?
+Answer: 2000.0
+Correct Answer: 2000.0
+Is Correct: True
+
+Question: Convert the measurement of 3 GB into MB.
+Answer: 3000.0
+Correct Answer: 3000.0
+Is Correct: True
+
+Question: How many ounce is 6 quart?
+Answer: 12.0
+Correct Answer: 192.0
+Is Correct: False
+
+Question: Please convert 5 ft into m.
+Answer: nan
+Correct Answer: 1.524
+Is Correct: False
+
+Question: Express 5 pound as a quantity of ounce.
+Answer: 80.0
+Correct Answer: 80.0
+Is Correct: True
+
+Question: Can you provide the conversion value from kg to pound for 1 units?
+Answer: 2.20462
+Correct Answer: 2.2046226218487757
+Is Correct: True
+
+Question: What is the equivalent of 7 kB in byte?
+Answer: 7000.0
+Correct Answer: 7000.0
+Is Correct: True
+
+Question: How many kg are there per 7 ton?
+Answer: 7000.0
+Correct Answer: 7000.0
+Is Correct: True
+
+Question: Could you give the conversion from litre to gallon for 10 units?
+Answer: 10000.0
+Correct Answer: 2.6417205235814833
+Is Correct: False
+
+Question: How many litre is 4 quart?
+Answer: 4000.0
+Correct Answer: 3.7854117840000012
+Is Correct: False
+
+Question: Could you give the conversion from quart to gallon for 10 units?
+Answer: 40.0
+Correct Answer: 2.5
+Is Correct: False
+
+Question: What is the conversion from century to decades for 3 units?
+Answer: 3000.0
+Correct Answer: 30.0
+Is Correct: False
+
+Question: How many km is 2 miles?
+Answer: 3.21868
+Correct Answer: 3.218688
+Is Correct: True
+
+Question: What is 1 GB in M?
+Answer: 1000000.0
+Correct Answer: 1000.0
+Is Correct: False
+
+Question: How does 2 kmh measure up in terms of in/s?
+Answer: 2000.0
+Correct Answer: 21.872265966754156
+Is Correct: False
+
+Question: How many kg make up 1 pound?
+Answer: 1000.0
+Correct Answer: 0.45359237
+Is Correct: False
+
+Question: Can you change 2 gallon to its equivalent in l?
+Answer: 2.0
+Correct Answer: 7.5708235680000024
+Is Correct: False
+
+Question: Express 2 cm as a quantity of in.
+Answer: 2.0
+Correct Answer: 0.7874015748031495
+Is Correct: False
+
+Question: How do we express 8 bit in terms of B?
+Answer: nan
+Correct Answer: 1.0
+Is Correct: False
+
+Question: Could you convert 5 century to its corresponding value in months?
+Answer: 60.0
+Correct Answer: 6000.0
+Is Correct: False
+
+Question: What is the conversion of 3 yd to mm?
+Answer: 10800.0
+Correct Answer: 2743.2000000000003
+Is Correct: False
+
+Question: How much is 3 m when converted to mm?
+Answer: 3000.0
+Correct Answer: 3000.0
+Is Correct: True
+
+Question: Could you convert 7 fluid ounce to its corresponding value in mL?
+Answer: 252.913387
+Correct Answer: 207.01470693750008
+Is Correct: False
+
+Question: How do we translate 1 KB into byte?
+Answer: 1000.0
+Correct Answer: 1000.0
+Is Correct: True
+
+Question: How do we express 5 kB in terms of byte?
+Answer: 5000.0
+Correct Answer: 5000.0
+Is Correct: True
+
+Question: What is the measurement of 8 weeks when converted into h?
+Answer: 56.0
+Correct Answer: 1344.0
+Is Correct: False
+
+Question: What is the conversion of 7 miles to ft?
+Answer: 7.0
+Correct Answer: 36960.0
+Is Correct: False
+
+Question: How does 6 year measure up in terms of months?
+Answer: 72.0
+Correct Answer: 72.0
+Is Correct: True
+
+Question: Tell me how many MB are there in 7 G.
+Answer: 7000.0
+Correct Answer: 7000.0
+Is Correct: True
+
+Question: Convert the measurement of 4 liter into fluid ounce.
+Answer: 134.328
+Correct Answer: 135.25609080737195
+Is Correct: True
+
+Question: What does 6 l equal in millilitre terms?
+Answer: 6000.0
+Correct Answer: 6000.000000000001
+Is Correct: True
+
+Question: How does 2 M measure up in terms of KB?
+Answer: 2000.0
+Correct Answer: 2000.0
+Is Correct: True
+
+Question: How much is 3 metric ton when converted to pound?
+Answer: 3000.0
+Correct Answer: 6613.867865546328
+Is Correct: False
+
+Question: Can you provide the conversion value from metric ton to kg for 10 units?
+Answer: 10000.0
+Correct Answer: 10000.0
+Is Correct: True
+
+Question: What is the conversion from quart to liter for 8 units?
+Answer: 8000.0
+Correct Answer: 7.5708235680000024
+Is Correct: False
+
+Question: What is the measurement of 1 hour when converted into second?
+Answer: 3600.0
+Correct Answer: 3600.0
+Is Correct: True
+
+Question: Could you convert 8 mph to its corresponding value in kmh?
+Answer: 2.67777778
+Correct Answer: 12.874751999999999
+Is Correct: False
+
+Question: What does 1 tonne equal in pound terms?
+Answer: 1000.0
+Correct Answer: 2204.622621848776
+Is Correct: False
+
+Question: What is the conversion from h to second for 5 units?
+Answer: 18000.0
+Correct Answer: 18000.0
+Is Correct: True
+
+Question: Please convert 6 h into seconds.
+Answer: 14400.0
+Correct Answer: 21600.0
+Is Correct: False
+
+Question: What is the measurement of 2 mph when converted into m/s?
+Answer: 0.894
+Correct Answer: 0.89408
+Is Correct: True
+
+Question: Please convert 6 mi/h into ft/s.
+Answer: 3.6272
+Correct Answer: 8.799999999999999
+Is Correct: False
+
+Question: What is 4 gallon in fluid ounce?
+Answer: 512.0
+Correct Answer: 512.0
+Is Correct: True
+
+Question: Convert 1 km to m?
+Answer: 1000.0
+Correct Answer: 1000.0
+Is Correct: True
+
+Question: Express 10 MB as a quantity of kB.
+Answer: 10000.0
+Correct Answer: 10000.0
+Is Correct: True
+
+Question: How do we translate 2 yd into meter?
+Answer: 1.8288
+Correct Answer: 1.8288000000000002
+Is Correct: True
+
+Question: What is 4 kg in g?
+Answer: 4000.0
+Correct Answer: 4000.0
+Is Correct: True
+
+Question: Could you provide the value of 5 cm in in?
+Answer: 1.97915235
+Correct Answer: 1.9685039370078738
+Is Correct: True
+
+Question: Express 10 years as a quantity of months.
+Answer: 120.0
+Correct Answer: 120.0
+Is Correct: True
+
+Question: Please convert 10 m into in.
+Answer: 10.0
+Correct Answer: 393.70078740157476
+Is Correct: False
+
+Question: How many kB is 1 M?
+Answer: 1000.0
+Correct Answer: 1000.0
+Is Correct: True
+
+Question: How many min is 5 hours?
+Answer: 300.0
+Correct Answer: 300.0
+Is Correct: True
+
+Question: Tell me how many kg are there in 6 metric ton.
+Answer: 6000.0
+Correct Answer: 6000.0
+Is Correct: True
+
+Question: Express 3 ton as a quantity of kg.
+Answer: 3000.0
+Correct Answer: 3000.0
+Is Correct: True
+
+Question: Convert the measurement of 4 gallon into cm**3.
+Answer: 4000.0
+Correct Answer: 15141.647136000003
+Is Correct: False
+
+Question: Could you convert 4 pound to its corresponding value in g?
+Answer: 4000.0
+Correct Answer: 1814.36948
+Is Correct: False
+
+Question: How many ounce make up 8 pint?
+Answer: 128.0
+Correct Answer: 128.0
+Is Correct: True
+
+Question: What is the conversion from month to h for 3 units?
+Answer: 36.0
+Correct Answer: 2191.4531926874997
+Is Correct: False
+
+Question: What is the conversion from miles to ft for 1 units?
+Answer: 5280.0
+Correct Answer: 5280.0
+Is Correct: True
+
+Question: Can you change 1 h to its equivalent in second?
+Answer: 3600.0
+Correct Answer: 3600.0
+Is Correct: True
+
+Question: Please convert 8 h into second.
+Answer: 28800.0
+Correct Answer: 28800.0
+Is Correct: True
+
