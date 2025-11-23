@@ -17,6 +17,7 @@ class VQADataset:
             data_dir: Directory containing the dataset (default: DATA_DIR)
         """
         self.data_dir = data_dir or DATA_DIR
+        print(f"Data directory: {self.data_dir}")
 
         # Load all QA pairs for the split
         self.qa_pairs = []
@@ -168,8 +169,8 @@ class VQABenchmarkResult:
             if is_correct:
                 correct_count += 1
 
-        print(correct_count)
-        print(len(samples))
+        print(f'correct_count: {correct_count}')
+        print(f'samples_count: {len(samples)}')
 
         return cls(accuracy=correct_count / len(samples) if samples else 0, samples=samples)
 

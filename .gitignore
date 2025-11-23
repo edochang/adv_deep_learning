@@ -51,6 +51,9 @@ homework2/logs/
 # Ignore classification and drive data files
 homework2/data/
 homework2/supertux_data.zip
+homework4/data/train/
+homework4/data/valid/
+homework4/supertux_data.zip
 
 # Ignore model saves
 homework3/homework/sft_model/checkpoint*/
@@ -61,3 +64,5 @@ homework3/homework/rft_model/checkpoint*/
 homework3/homework/rft_model/*.jinja
 homework3/homework/rft_model/events.out.tfevents.*
 homework3/homework/rft_model/*.txt
+homework4/homework/demo_train
+homework4/homework/vlm_sft
