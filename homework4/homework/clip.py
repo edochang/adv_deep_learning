@@ -1,3 +1,4 @@
+# Copilot was used as a teaching assistance and guide
 from pathlib import Path
 from typing import Any
 
@@ -102,13 +103,29 @@ class CLIP(nn.Module):
         self.vision_encoder = vision_encoder
         self.text_encoder = text_encoder
         # TODO: implement the rest components
-        raise NotImplementedError("Not implemented")
+        """
+        Args:
+            vision_encoder: The vision encoder model.
+            text_encoder: The text encoder model.
+            proj_dim: The dimension of the common embedding space.
+            temperature: The temperature parameter for scaling logits.
+        """
+        # Linear layers to project both vision and text features retrieved from Huggingface configuration hidden_size to a common embedding space of dimension `proj_dim`.  This is also mentinoed in Learning_Transferable_Visual_Models_From_Natural_Language_Supervision paper in section 2.3.
+        # https://huggingface.co/docs/transformers/en/main_classes/configuration
+        # Setup vision projection
+        self.vision_projection = nn.Linear(self.vision_encoder.config.hidden_size, proj_dim)
+        # Setup text projection
+        self.text_projection = nn.Linear(self.text_encoder.config.hidden_size, proj_dim)
+        
+        # Temperature Notes: temperature scales the image–text similarity logits. Lower temperature makes the softmax sharper (pushes matching pairs closer, non-matching farther), higher temperature makes it softer. Making it a learnable nn.Parameter lets training adjust the contrast of the similarity distribution for better gradients and alignment.
+        # Temperature parameter - make it learnable and store it as log for numerical stability during training
+        self.logit_scale = nn.Parameter(torch.ones([]) * torch.log(torch.tensor(1.0 / temperature)))
 
     def encode_image(self, image: torch.Tensor) -> torch.Tensor:
         return self.vision_encoder(image)
 
-    def encode_text(self, text: str) -> torch.Tensor:
-        return self.text_encoder(text)
+    def encode_text(self, input_ids: torch.Tensor, attention_mask: torch.Tensor = None) -> torch.Tensor:
+        return self.text_encoder(input_ids=input_ids, attention_mask=attention_mask)
 
     def save_pretrained(self, save_directory: str, **kwargs):
         """Customize save method, save additional parameters"""
@@ -180,8 +197,25 @@ class CLIP(nn.Module):
         Returns:
             TODO: think about the what values should be returned
         """
-        raise NotImplementedError("Not implemented")
+        # For more information on smolvlm transformer outputs / hidden states, refer to: https://huggingface.co/docs/transformers/en/model_doc/smolvlm
+        # Encode image and text / extract feature representations of each modality
+        # Extract features - use last_hidden_state and pool; For vision: mean pool over spatial dimensions
+        vision_features = self.encode_image(pixel_values).last_hidden_state.mean(dim=1)  # shape [batch_size, d_i]
+        # For text: use the last token's hidden state or mean pool; # Option 1: Mean pooling over sequence length
+        text_features = self.encode_text(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state.mean(dim=1)  # shape [batch_size, d_t]
 
+        # Option 2 (alternative): Use last token (uncomment if preferred)
+        # text_features = text_output.last_hidden_state[:, -1, :]  # shape (batch_size, d_t)
+
+        # joint multimodal embedding [n, d_e] / Project to common embedding space and normalize
+        # where d_e is the dimension of the common embedding space
+        #I_e = l2_normalize(np.dot(I_f, W_i), axis=1)
+        vision_embeddings = nn.functional.normalize(self.vision_projection(vision_features), dim=-1, p=2)
+        #T_e = l2_normalize(np.dot(T_f, W_t), axis=1)
+        text_embeddings = nn.functional.normalize(self.text_projection(text_features), dim=-1, p=2)
+
+        # return a tuple of vision features, text features, and logits scale
+        return vision_embeddings, text_embeddings, self.logit_scale
 
 def compute_clip_loss(
     outputs: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
@@ -199,7 +233,40 @@ def compute_clip_loss(
     Returns:
         The loss for the CLIP model.
     """
-    raise NotImplementedError("Not implemented")
+    vision_embeddings, text_embeddings, logit_scale = outputs
+
+    # Debug prints
+    """
+    print(f"Vision embeddings shape: {vision_embeddings.shape}") # debug print
+    print(f"Text embeddings shape: {text_embeddings.shape}") # debug print
+    print(f"Vision norm (should be ~1): {vision_embeddings.norm(dim=-1).mean():.3f}") # debug print
+    print(f"Text norm (should be ~1): {text_embeddings.norm(dim=-1).mean():.3f}") # debug print
+    print(f"Logit scale: {logit_scale.exp():.3f}") # debug print
+    """
+
+    loss_fn = nn.CrossEntropyLoss()
+
+    # Clamp the logit_scale to prevent instability
+    scale = logit_scale.exp().clamp(max=100.0)  # prevent extreme values
+
+    # Multiply by exp(temperature) since temperature is stored in log-space to control softmax sharpness in the contrastive loss
+    logits = vision_embeddings @ text_embeddings.T * scale  # shape (batch_size, batch_size)
+
+    """
+    print(f"Logits shape: {logits.shape}") # debug print
+    print(f"Logits range: {logits.min():.2f} to {logits.max():.2f}") # debug print
+    print(f"Diagonal (correct matches): {logits.diag().mean():.2f}") # debug print
+    """ 
+
+    # Correct targets are the diagonal elements
+    targets = torch.arange(logits.size(0), device=logits.device) # shape (batch_size,)
+    loss_img_to_text = loss_fn(logits, targets)
+    loss_text_to_img = loss_fn(logits.T, targets)
+
+    #print(f"Loss img->text: {loss_img_to_text:.3f}, text->img: {loss_text_to_img:.3f}") # debug print
+
+    loss = (loss_img_to_text + loss_text_to_img) / 2
+    return loss
 
 
 def get_target_modules_for_lora(model: nn.Module) -> list[str]:
@@ -218,6 +285,7 @@ def get_target_modules_for_lora(model: nn.Module) -> list[str]:
 
 def train(
     data_dir: Path | None = None,
+    train_dataset_name: str = "train",
     output_dir: str = "clip",
     num_train_epochs: float = 0.05,  # for debugging purpose, increase this once the dry run works
     per_device_train_batch_size: int = 1024,
@@ -259,7 +327,7 @@ def train(
     model.enable_input_require_grads()
 
     # load dataset
-    train_dataset = CaptionDataset("train", data_dir)
+    train_dataset = CaptionDataset(train_dataset_name, data_dir)
     train_dataset = CaptionDatasetForTraining(train_dataset, processor)
 
     training_args = TrainingArguments(
@@ -333,7 +401,9 @@ def test(ckpt_path: str, val_dataset: str = "valid_grader"):
 
     for pair in tqdm.tqdm(testset):
         image = Image.open(pair["image_path"]).convert("RGB")
-        pixel_values = image_processor(image).unsqueeze(0).to(device).bfloat16()
+        pixel_values = image_processor(image).unsqueeze(0).to(device)
+        if device == "cuda":
+            pixel_values = pixel_values.bfloat16()
         text_inputs = processor(
             text=[s + processor.tokenizer.eos_token for s in pair["candidates"]],
             return_tensors="pt",
@@ -354,7 +424,7 @@ def test(ckpt_path: str, val_dataset: str = "valid_grader"):
 def main():
     from fire import Fire
 
-    Fire({"train": train, "test": test})
+    Fire({"demo_train": demo_train, "train": train, "test": test})
 
 
 if __name__ == "__main__":

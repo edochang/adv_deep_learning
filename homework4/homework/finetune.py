@@ -1,3 +1,4 @@
+# Copilot was used as a teaching assistance and guide
 from pathlib import Path
 
 import torch

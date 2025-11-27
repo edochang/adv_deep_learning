@@ -63,6 +63,7 @@ class VQADataset:
 class CaptionDataset:
     def __init__(self, split: str, data_dir: Path = None, max_samples: int = None):
         self.data_dir = data_dir or DATA_DIR
+        print(f"Data directory: {self.data_dir}")
 
         self.captions = []
 
