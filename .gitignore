@@ -65,4 +65,6 @@ homework3/homework/rft_model/*.jinja
 homework3/homework/rft_model/events.out.tfevents.*
 homework3/homework/rft_model/*.txt
 homework4/homework/demo_train
-homework4/homework/vlm_sft
+homework4/homework/vlm_model
+homework4/homework/demo_clip
+homework4/homework/clip_model
